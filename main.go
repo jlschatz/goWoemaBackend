@@ -11,12 +11,12 @@ import (
 
 func main() {
 
-	//uploadS3 :=
+	//uploadS3 := uploadToS3.NewUploadS3Service()
 
-	//mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-	//http.Handle("/", accessControl(mux))
-	//mux.HandleFunc("/upload",)
+	mux.Handle("/", accessControl(mux))
+	//mux.HandleFunc("/upload", testPrint())
 
 	errs := make(chan error, 2)
 	go func() {
@@ -32,16 +32,20 @@ func main() {
 	log.Println("terminated", <-errs)
 }
 
-//func accessControl(h http.Handler) http.Handler {
-//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		w.Header().Set("Access-Control-Allow-Origin", "*")
-//		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-//		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-//
-//		if r.Method == "OPTIONS" {
-//			return
-//		}
-//
-//		h.ServeHTTP(w, r)
-//	})
-//}
+func accessControl(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+func testPrint() {
+	log.Println("HTTP request received")
+}
