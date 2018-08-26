@@ -1,51 +1,26 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gorilla/mux"
+	"goWoemaBackend/receiveImage"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 )
+
+type Recipt struct {
+
+	transactionID string
+
+}
 
 func main() {
 
-	//uploadS3 := uploadToS3.NewUploadS3Service()
+	r := receiveImage.NewRESTReceiveImageService()
 
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
-	mux.Handle("/", accessControl(mux))
-	//mux.HandleFunc("/upload", testPrint())
+	router.HandleFunc("/uploadReceipt", r.Receive).Methods("POST")
+	//router.HandleFunc("/getReceipt/{id}", u.).Methods("GET")
 
-	errs := make(chan error, 2)
-	go func() {
-		log.Println("transport", "http", "address", ":8002", "msg", "listening")
-		errs <- http.ListenAndServe(":8002", nil)
-	}()
-	go func() {
-		c := make(chan os.Signal)
-		signal.Notify(c, syscall.SIGINT)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
-
-	log.Println("terminated", <-errs)
-}
-
-func accessControl(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		h.ServeHTTP(w, r)
-	})
-}
-
-func testPrint() {
-	log.Println("HTTP request received")
+	log.Fatal(http.ListenAndServe(":9002",router))
 }
