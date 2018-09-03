@@ -1,4 +1,4 @@
-package uploadToS3
+package receiptFunctions
 
 import (
 	"fmt"

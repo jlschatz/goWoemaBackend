@@ -2,16 +2,10 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"goWoemaBackend/receiptFunctions"
+	"github.com/jlschatz/goWoemaBackend/receiptFunctions"
 	"log"
 	"net/http"
 )
-
-type Recipt struct {
-
-	transactionID string
-
-}
 
 func main() {
 

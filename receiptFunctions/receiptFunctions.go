@@ -2,7 +2,7 @@ package receiptFunctions
 
 import (
 	"fmt"
-	"goWoemaBackend/uploadToS3"
+	"github.com/jlschatz/goWoemaBackend/uploadToS3"
 	"image"
 	"io"
 	"net/http"
