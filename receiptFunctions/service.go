@@ -29,8 +29,8 @@ type service struct {
 	u2S3 s3bucket.Service
 }
 
-func NewRESTReceiveImageService() Service {
-	s := &service{}
+func NewRESTReceiveImageService(s3 s3bucket.Service) Service {
+	s := &service{u2S3: s3}
 	return s
 }
 
@@ -39,6 +39,7 @@ func (s *service) Upload(w http.ResponseWriter, r *http.Request) {
 	transactionID := params["id"]
 
 	log.Println(transactionID)
+
 	fmt.Println("method:", r.Method)
 
 	r.ParseMultipartForm(32 << 20)
@@ -57,9 +58,8 @@ func (s *service) Upload(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 	defer os.Remove(f.Name())
 	io.Copy(f, file)
-	os.Rename(f.Name(), "poop.jpg")
-	log.Println("File arrived")
-	//s.u2S3.Upload2S3("poop.jpg")
+	os.Rename(f.Name(), transactionID + ".jpg")
+	s.u2S3.Upload2S3(transactionID + ".jpg")
 }
 
 

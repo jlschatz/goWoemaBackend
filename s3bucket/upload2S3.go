@@ -1,12 +1,15 @@
 package s3bucket
 
 import (
+	"bytes"
 	"fmt"
-	"os"
-	"path/filepath"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awsutil"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"net/http"
+	"os"
 )
 
 type Service interface {
@@ -23,31 +26,40 @@ func NewRESTUploadS3Service() Service{
 
 func (s * service)Upload2S3(fileToUpload string) {
 
-	bucket := "receipt-storage-woema"
-	filename := fileToUpload
-
-	file, err := os.Open(filename)
+	aws_access_key_id := "AKIAJUG44M2JHSCDDIJA"
+	aws_secret_access_key := "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"
+	token := ""
+	creds := credentials.NewStaticCredentials(aws_access_key_id, aws_secret_access_key, token)
+	_, err := creds.Get()
 	if err != nil {
-		fmt.Println("Failed to open file", filename, err)
-		os.Exit(1)
+		// handle error
+	}
+	cfg := aws.NewConfig().WithRegion("us-east-1").WithCredentials(creds)
+	svc := s3.New(session.New(), cfg)
+
+	file, err := os.Open(fileToUpload)
+	if err != nil {
+		// handle error
 	}
 	defer file.Close()
+	fileInfo, _ := file.Stat()
+	size := fileInfo.Size()
+	buffer := make([]byte, size) // read file content to buffer
 
-	//select Region to use.
-	conf := aws.Config{Region: aws.String("us-west-2")}
-	sess, _ := session.NewSession(&conf)
-	svc := s3manager.NewUploader(sess)
-
-	fmt.Println("Uploading file to S3...")
-	result, err := svc.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(filepath.Base(filename)),
-		Body:   file,
-	})
-	if err != nil {
-		fmt.Println("error", err)
-		os.Exit(1)
+	file.Read(buffer)
+	fileBytes := bytes.NewReader(buffer)
+	fileType := http.DetectContentType(buffer)
+	path := "/receiptImages/" + file.Name()
+	params := &s3.PutObjectInput{
+		Bucket:        aws.String("receipt-storage-101"),
+		Key:           aws.String(path),
+		Body:          fileBytes,
+		ContentLength: aws.Int64(size),
+		ContentType:   aws.String(fileType),
 	}
-
-	fmt.Printf("Successfully uploaded %s to %s\n", filename, result.Location)
+	resp, err := svc.PutObject(params)
+	if err != nil {
+		// handle error
+	}
+	fmt.Printf("response %s", awsutil.StringValue(resp))
 }
