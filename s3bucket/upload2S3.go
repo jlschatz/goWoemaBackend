@@ -1,4 +1,4 @@
-package receiptFunctions
+package s3bucket
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	Upload(bucketName, fileToUpload string)
+	Upload2S3(fileToUpload string)
 }
 
 type service struct {
@@ -21,9 +21,9 @@ func NewRESTUploadS3Service() Service{
 	return s
 }
 
-func (s * service)Upload(bucketName, fileToUpload string) {
+func (s * service)Upload2S3(fileToUpload string) {
 
-	bucket := bucketName
+	bucket := "receipt-storage-woema"
 	filename := fileToUpload
 
 	file, err := os.Open(filename)
@@ -35,7 +35,7 @@ func (s * service)Upload(bucketName, fileToUpload string) {
 
 	//select Region to use.
 	conf := aws.Config{Region: aws.String("us-west-2")}
-	sess := session.New(&conf)
+	sess, _ := session.NewSession(&conf)
 	svc := s3manager.NewUploader(sess)
 
 	fmt.Println("Uploading file to S3...")

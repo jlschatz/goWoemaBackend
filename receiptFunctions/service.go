@@ -2,11 +2,13 @@ package receiptFunctions
 
 import (
 	"fmt"
-	"github.com/jlschatz/goWoemaBackend/uploadToS3"
 	"image"
 	"io"
 	"net/http"
 	"os"
+	"github.com/jlschatz/goWoemaBackend/s3bucket"
+	"github.com/gorilla/mux"
+	"log"
 )
 
 type transactions struct {
@@ -19,12 +21,12 @@ type transaction struct {
 }
 
 type Service interface {
-	Receive(w http.ResponseWriter, r *http.Request)
-	//	GetSpecificReceipt(w http.ResponseWriter, r *http.Request)
+	Upload(w http.ResponseWriter, r *http.Request)
+	GetReceipt(w http.ResponseWriter, r *http.Request)
 }
 
 type service struct {
-	u2S3 uploadToS3.Service
+	u2S3 s3bucket.Service
 }
 
 func NewRESTReceiveImageService() Service {
@@ -32,11 +34,15 @@ func NewRESTReceiveImageService() Service {
 	return s
 }
 
-func (s *service) Receive(w http.ResponseWriter, r *http.Request) {
+func (s *service) Upload(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	transactionID := params["id"]
+
+	log.Println(transactionID)
 	fmt.Println("method:", r.Method)
 
 	r.ParseMultipartForm(32 << 20)
-	file, handler, err := r.FormFile("uploadfile")
+	file, handler, err := r.FormFile("chuck.jpg")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -52,17 +58,11 @@ func (s *service) Receive(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(f.Name())
 	io.Copy(f, file)
 	os.Rename(f.Name(), "poop.jpg")
-
+	log.Println("File arrived")
+	//s.u2S3.Upload2S3("poop.jpg")
 }
 
-//
-//func (s *service)GetSpecificReceipt(w http.ResponseWriter, r *http.Request) {
-//	w.Header().Set("Content-Type", "application/json")
-//	params := mux.Vars(r)
-//
-//
-//
-//	for _, trans := range t {
-//		if trans.
-//	}
-//}
+
+func (s *service)GetReceipt(w http.ResponseWriter, r *http.Request) {
+
+}
