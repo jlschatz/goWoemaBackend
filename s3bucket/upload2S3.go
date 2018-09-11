@@ -19,15 +19,15 @@ type Service interface {
 type service struct {
 }
 
-func NewRESTUploadS3Service() Service{
+func NewS3UploadService() Service{
 	s := &service{}
 	return s
 }
 
 func (s * service)Upload2S3(fileToUpload string) {
 
-	aws_access_key_id := "AKIAJUG44M2JHSCDDIJA"
-	aws_secret_access_key := "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"
+	aws_access_key_id := ""
+	aws_secret_access_key := ""
 	token := ""
 	creds := credentials.NewStaticCredentials(aws_access_key_id, aws_secret_access_key, token)
 	_, err := creds.Get()

@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	s3 := s3bucket.NewRESTUploadS3Service()
+	s3 := s3bucket.NewS3UploadService()
 	r := receiptFunctions.NewRESTReceiveImageService(s3)
 
 	var wait time.Duration
